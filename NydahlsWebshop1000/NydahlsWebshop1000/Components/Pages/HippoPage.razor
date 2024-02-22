@@ -1,0 +1,28 @@
+﻿@page "/hippo-page/{id:int}"
+@using NydahlsWebshop1000.Models
+@using NydahlsWebshop1000.Repository
+@inject ProductRepository productRepository
+
+<img src="@hippo?.ImgUrl"/>
+<h3>@hippo?.Title</h3>
+<p>Description: @hippo?.Description</p>
+<p>Price: @hippo?.Price (USD)</p>
+<button class="btn btn-primary">Add to chart</button>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    Product? hippo = new();
+
+    public async Task GetHippo(int id)
+    {
+        var fetchedHippo = await productRepository.GetProduct(id);
+        hippo = fetchedHippo;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetHippo(Id);
+    }
+}

@@ -1,0 +1,37 @@
+﻿Product nyProdukt1 = new Product
+        {
+            Title = "Hippo-bird",
+            Description = "A mix between a hippo and a bird.",
+            ImgUrl = "/images/HippoBird.jpg",
+            Price = 100
+        };
+
+    Product nyProdukt2 = new Product
+        {
+            Title = "Hippo-dog",
+            Description = "A mix between a hippo and a dog.",
+            ImgUrl = "/images/HippoDog.jpg",
+            Price = 100
+        };
+
+    Product nyProdukt3 = new Product
+        {
+            Title = "Hippo-snake",
+            Description = "A mix between a hippo and a snake.",
+            ImgUrl = "/images/HippoSnake.jpg",
+            Price = 100
+        };
+    Product nyProdukt4 = new Product
+        {
+            Title = "Hippo-Tiger",
+            Description = "A mix between a hippo and a tiger.",
+            ImgUrl = "/images/HippoTiger.jpg",
+            Price = 100
+        };
+    Product nyProdukt5 = new Product
+        {
+            Title = "Hippo-Turtle",
+            Description = "A mix between a hippo and a Turtle.",
+            ImgUrl = "/images/HippoTurtle.jpg",
+            Price = 100
+        };
