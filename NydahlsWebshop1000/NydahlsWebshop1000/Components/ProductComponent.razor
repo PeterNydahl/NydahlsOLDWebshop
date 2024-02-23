@@ -1,0 +1,15 @@
+﻿@using NydahlsWebshop1000.Models
+@using NydahlsWebshop1000.Repository
+@inject ProductRepository productRepository
+
+<p>
+    <a href=@($"/hippo-page/{@Product?.Id}")>
+        <img src="@Product?.ImgUrl"><br />
+        @Product?.Title
+    </a>
+</p>
+
+@code {
+    [Parameter]
+    public Product? Product { get; set; }
+}

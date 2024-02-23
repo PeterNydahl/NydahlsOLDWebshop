@@ -3,19 +3,14 @@
 @using NydahlsWebshop1000.Models
 @inject ProductRepository productRepository
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Hippo Home</PageTitle>
 
 <h2>Welcome to the hippo-mix webshop!</h2>
 
 <container id="product-container">
     @foreach (var item in products)
     {
-        <p>
-            <a href=@($"/hippo-page/{@item.Id}")>
-                <img src="@item.ImgUrl"><br />
-                @item.Title
-             </a>
-        </p>
+        <ProductComponent Product="@item"></ProductComponent>
     }
 </container>
 
@@ -24,16 +19,6 @@
     List<Product> products = new();
 
     protected override async Task OnInitializedAsync()
-    {
-        await GetProducts();
-    }
-
-    public async Task AddProduct(Product product)
-    {
-        await productRepository.AddProduct(product);
-    }
-
-    public async Task GetProducts()
     {
         products = await productRepository.GetProducts();
     }
