@@ -1,3 +1,4 @@
+using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -5,6 +6,7 @@ using NydahlsWebshop1000.Client.Pages;
 using NydahlsWebshop1000.Components;
 using NydahlsWebshop1000.Components.Account;
 using NydahlsWebshop1000.Data;
+using NydahlsWebshop1000.Models;
 using NydahlsWebshop1000.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -38,7 +40,9 @@ builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.Requ
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
+// ********************** my injects ************************
 builder.Services.AddScoped<ProductRepository>();
+builder.Services.AddSingleton<ShoppingCart>();
 
 var app = builder.Build();
 

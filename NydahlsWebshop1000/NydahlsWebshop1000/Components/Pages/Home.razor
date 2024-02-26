@@ -1,11 +1,11 @@
 ﻿@page "/"
+@using NydahlsWebshop1000.Data
 @using NydahlsWebshop1000.Repository
 @using NydahlsWebshop1000.Models
 @inject ProductRepository productRepository
+@inject ShoppingCart shoppingCart
 
 <PageTitle>Hippo Home</PageTitle>
-
-<h2>Welcome to the hippo-mix webshop!</h2>
 
 <container id="product-container">
     @foreach (var item in products)
@@ -14,12 +14,35 @@
     }
 </container>
 
-
 @code {
     List<Product> products = new();
 
     protected override async Task OnInitializedAsync()
     {
         products = await productRepository.GetProducts();
+
+        shoppingCart.TypesOfProducts = products;
+
+        //skapa mall för dictionary i varukorgen med produkter samt antal
+        if (shoppingCart.ProductsAndAmounts.Count == 0)
+        {
+            foreach (var item in products)
+            {
+                shoppingCart.ProductsAndAmounts.Add(item.Id, 0);
+            }
+
+
+            // shoppingCart.ProductsAndAmounts.Add(shoppingCart.TypesOfProducts[0], 0);
+            // shoppingCart.ProductsAndAmounts.Add(shoppingCart.TypesOfProducts[1], 0);
+            // shoppingCart.ProductsAndAmounts.Add(shoppingCart.TypesOfProducts[2], 0);
+            // shoppingCart.ProductsAndAmounts.Add(shoppingCart.TypesOfProducts[3], 0);
+            // shoppingCart.ProductsAndAmounts.Add(shoppingCart.TypesOfProducts[4], 0);
+            
+            // shoppingCart.ProductsAndAmounts.Add(shoppingCart.TypesOfProducts[0], shoppingCart.HippoBirdAmount);
+            // shoppingCart.ProductsAndAmounts.Add(shoppingCart.TypesOfProducts[1], shoppingCart.HippoDogAmount);
+            // shoppingCart.ProductsAndAmounts.Add(shoppingCart.TypesOfProducts[2], shoppingCart.HippoSnakeAmount);
+            // shoppingCart.ProductsAndAmounts.Add(shoppingCart.TypesOfProducts[3], shoppingCart.HippoTigerAmount);
+            // shoppingCart.ProductsAndAmounts.Add(shoppingCart.TypesOfProducts[4], shoppingCart.HippoTurtleAmount);
+        }
     }
 }
