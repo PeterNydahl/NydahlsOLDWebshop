@@ -1,0 +1,48 @@
+﻿@using Data
+@inject ShoppingCart shoppingCart
+
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Product</th>
+            <th>Price(USD)/item</th>
+            <th>Amount</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (KeyValuePair<int, int> pair in shoppingCart.ProductsAndAmounts)
+        {
+            if (pair.Value != 0)
+            {
+                <tr>
+                    <td>@(shoppingCart.TypesOfProducts.SingleOrDefault(p => p.Id == pair.Key).Title)</td>
+                    <td>@(shoppingCart.TypesOfProducts.SingleOrDefault(p => p.Id == pair.Key).Price)</td>
+                    <td>@pair.Value</td>
+                </tr>
+            }
+        }
+        <tr><td></td></tr>
+        <tr>
+            <th scope="row">Total price(USD): @totalPrice</th>
+        </tr>
+    </tbody>
+</table>
+
+@code{
+    long totalPrice = 0;
+
+    protected override void OnInitialized()
+    {
+        calculateTotalOrderPrice();
+    }
+
+    public void calculateTotalOrderPrice()
+    {
+        foreach (KeyValuePair<int, int> nyckelvärdepar in shoppingCart.ProductsAndAmounts)
+        {
+            totalPrice += shoppingCart.TypesOfProducts.SingleOrDefault(p => p.Id == nyckelvärdepar.Key).Price
+            * nyckelvärdepar.Value;
+        }
+    }
+}

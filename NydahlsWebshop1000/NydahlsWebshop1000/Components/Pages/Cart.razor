@@ -1,39 +1,87 @@
-﻿@page "/cart"
-@using NydahlsWebshop1000.Data
-@using NydahlsWebshop1000.Models
-@inject ShoppingCart shoppingCart;
+﻿@page "/cart/{pageid:int}"
+@using Data
+@using Models
 
-<h3>Cart</h3>
+@inject ShoppingCart shoppingCart
+@rendermode InteractiveServer
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Product</th>
-            <th>Price(USD)/item</th>
-            <th>Amount</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (KeyValuePair<int, int> pair in shoppingCart.ProductsAndAmounts)
-        {
-            if (pair.Value != 0)
+@if (PageId == 1)
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Price(USD)/item</th>
+                <th>Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (KeyValuePair<int, int> pair in shoppingCart.ProductsAndAmounts)
             {
-                <tr>
-                    <td>@(shoppingCart.TypesOfProducts.SingleOrDefault(p => p.Id == pair.Key).Title)</td>
-                    <td>@(shoppingCart.TypesOfProducts.SingleOrDefault(p => p.Id == pair.Key).Price)</td>
-                    <td>@pair.Value</td>
-                </tr>
+                if (pair.Value != 0)
+                {
+                    <tr>
+                        <td>@(shoppingCart.TypesOfProducts.SingleOrDefault(p => p.Id == pair.Key).Title)</td>
+                        <td>@(shoppingCart.TypesOfProducts.SingleOrDefault(p => p.Id == pair.Key).Price)</td>
+                        <td>@pair.Value</td>
+                    </tr>
+                }
             }
-        }
-        <tr><td></td></tr>
-        <tr>
-            <th scope="row">Total price(USD): @totalPrice</th>
-        </tr>
-    </tbody>
-</table>
+            <tr><td></td></tr>
+            <tr>
+                <th scope="row">Total price(USD): @totalPrice</th>
+            </tr>
+        </tbody>
+    </table>
+
+
+
+    @* ***** form (input data from user) ****** *@
+    <EditForm Model="@orderUserData" OnSubmit="HandleFormSubmission" FormName="user-form">
+        <div class="form-group m-3">
+            <label for="first-name">First Name</label>
+            <InputText id="first-name" @bind-Value="@orderUserData.FirstName"></InputText>
+        </div>
+        @* <div class="form-group m-3">
+    <label for="last-name">Last Name</label>
+    <InputText id="first-name" @bind-Value="@orderUserData.LastName"></InputText>
+    </div>
+    <div class="form-group m-3">
+    <label for="street-adress">Street Adress</label>
+    <InputText id="street-adress"></InputText>
+    </div>
+    <div class="form-group m-3">
+    <label for="postal-code">Postal Code</label>
+    <InputText id="postal-code"></InputText>
+    </div>
+    <div class="form-group m-3">
+    <label for="city">City</label>
+    <InputText id="city"></InputText>
+    </div> *@
+
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary">Send Order</button>
+        </div>
+    </EditForm>
+
+    <br />
+    <br />
+    <br />
+    <ul>
+        <p>@message</p>
+        <p>@messagefromform</p>
+    </ul>
+}
+
 
 @code {
+    [Parameter]
+    public int PageId { get; set; }
+
+    string message = string.Empty;
+    string messagefromform = string.Empty;
     long totalPrice = 0;
+    OrderUserData orderUserData = new();
 
     protected override void OnInitialized()
     {
@@ -43,9 +91,17 @@
     public void calculateTotalOrderPrice()
     {
         foreach (KeyValuePair<int, int> nyckelvärdepar in shoppingCart.ProductsAndAmounts)
-        {        
-                totalPrice += shoppingCart.TypesOfProducts.SingleOrDefault(p => p.Id == nyckelvärdepar.Key).Price
-                * nyckelvärdepar.Value;
+        {
+            totalPrice += shoppingCart.TypesOfProducts.SingleOrDefault(p => p.Id == nyckelvärdepar.Key).Price
+            * nyckelvärdepar.Value;
         }
+    }
+
+
+    public void HandleFormSubmission(EditContext context)
+    {
+        messagefromform = orderUserData.FirstName;
+        message = "The function was evoked!";
+        PageId = 2;
     }
 }
