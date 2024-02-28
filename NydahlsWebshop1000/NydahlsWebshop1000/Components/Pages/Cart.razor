@@ -1,12 +1,70 @@
 ﻿@page "/cart/{pageid:int}"
-@using Data
-@using Models
+@using NydahlsWebshop1000.Data.Classes
+@using NydahlsWebshop1000.Data
+@using NydahlsWebshop1000.Models
 
 @inject ShoppingCart shoppingCart
 @rendermode InteractiveServer
 
+@* SHOW CHECKOUT *@
+@if (PageId == 2)
+{
+    <h3>Thank you for your order!</h3>
+    <br />
+    <br />
+    <br />
+    @* Checkout - customer data *@
+    <table class="table" id="order-confirmation-table">
+        <tr>
+            <th scope="row">Customer</th>
+            <td>@orderUserData.FirstName @orderUserData.LastName</td>
+        </tr>
+        <tr>
+            <th scope="row">Adress</th>
+            <td>@orderUserData.StreetAdress, @orderUserData.PostalCode</td>
+        </tr>
+        <tr>
+            <th scope="row">City</th>
+            <td>@orderUserData.City</td>
+        </tr>
+    </table>
+    <br />
+    <br />
+    <br />
+
+    @* Checkout - products & total price *@
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Price(USD)/item</th>
+                <th>Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (KeyValuePair<int, int> pair in checkoutProductsAndAmounts)
+            {
+                if (pair.Value != 0)
+                {
+                    <tr>
+                        <td>@(shoppingCart.TypesOfProducts.SingleOrDefault(p => p.Id == pair.Key).Title)</td>
+                        <td>@(shoppingCart.TypesOfProducts.SingleOrDefault(p => p.Id == pair.Key).Price)</td>
+                        <td>@pair.Value</td>
+                    </tr>
+                }
+            }
+            <tr><td></td></tr>
+            <tr>
+                <th scope="row">Total price(USD): @checkoutTotalPrice</th>
+            </tr>
+        </tbody>
+    </table>
+}
+
+@* SHOW SHOPPING CART *@
 @if (PageId == 1)
 {
+    @* ***** current cart ****** *@
     <table class="table">
         <thead>
             <tr>
@@ -29,48 +87,40 @@
             }
             <tr><td></td></tr>
             <tr>
-                <th scope="row">Total price(USD): @totalPrice</th>
+                <th scope="row">Total price(USD): @currentTotalPrice</th>
             </tr>
         </tbody>
     </table>
-
-
+    <br />
 
     @* ***** form (input data from user) ****** *@
+    <h5><b>Enter your information</b></h5>
     <EditForm Model="@orderUserData" OnSubmit="HandleFormSubmission" FormName="user-form">
         <div class="form-group m-3">
-            <label for="first-name">First Name</label>
             <InputText id="first-name" @bind-Value="@orderUserData.FirstName"></InputText>
+            <label for="first-name">First Name</label>
         </div>
-        @* <div class="form-group m-3">
-    <label for="last-name">Last Name</label>
-    <InputText id="first-name" @bind-Value="@orderUserData.LastName"></InputText>
-    </div>
-    <div class="form-group m-3">
-    <label for="street-adress">Street Adress</label>
-    <InputText id="street-adress"></InputText>
-    </div>
-    <div class="form-group m-3">
-    <label for="postal-code">Postal Code</label>
-    <InputText id="postal-code"></InputText>
-    </div>
-    <div class="form-group m-3">
-    <label for="city">City</label>
-    <InputText id="city"></InputText>
-    </div> *@
+        <div class="form-group m-3">
+            <InputText id="last-name" @bind-Value="@orderUserData.LastName"></InputText>
+            <label for="last-name">Last Name</label>
+        </div>
+        <div class="form-group m-3">
+            <InputText id="street-adress" @bind-Value="@orderUserData.StreetAdress"></InputText>
+            <label for="street-adress">Street Adress</label>
+        </div>
+        <div class="form-group m-3">
+            <InputNumber id="postal-code" TValue="int" @bind-Value="orderUserData.PostalCode"></InputNumber>
+            <label for="postal-code">Postal Code</label>
+        </div>
+        <div class="form-group m-3">
+            <InputText id="city" @bind-Value="@orderUserData.City"></InputText>
+            <label for="city">city</label>
+        </div>
 
         <div class="form-group">
             <button type="submit" class="btn btn-primary">Send Order</button>
         </div>
     </EditForm>
-
-    <br />
-    <br />
-    <br />
-    <ul>
-        <p>@message</p>
-        <p>@messagefromform</p>
-    </ul>
 }
 
 
@@ -78,30 +128,33 @@
     [Parameter]
     public int PageId { get; set; }
 
-    string message = string.Empty;
-    string messagefromform = string.Empty;
-    long totalPrice = 0;
+    long currentTotalPrice = 0;
+    long checkoutTotalPrice = 0;
+    Dictionary<int, int> checkoutProductsAndAmounts = new();
+
     OrderUserData orderUserData = new();
 
     protected override void OnInitialized()
     {
-        calculateTotalOrderPrice();
+        currentTotalPrice = calculateTotalOrderPrice();
     }
 
-    public void calculateTotalOrderPrice()
+    public long calculateTotalOrderPrice()
     {
+        long totalPrice = 0;
         foreach (KeyValuePair<int, int> nyckelvärdepar in shoppingCart.ProductsAndAmounts)
         {
             totalPrice += shoppingCart.TypesOfProducts.SingleOrDefault(p => p.Id == nyckelvärdepar.Key).Price
             * nyckelvärdepar.Value;
         }
+        return totalPrice; 
     }
 
-
     public void HandleFormSubmission(EditContext context)
-    {
-        messagefromform = orderUserData.FirstName;
-        message = "The function was evoked!";
-        PageId = 2;
+    {       
+        checkoutTotalPrice = currentTotalPrice;
+        checkoutProductsAndAmounts = new Dictionary<int, int>(shoppingCart.ProductsAndAmounts);
+        shoppingCart.ProductsAndAmounts.Clear();
+        PageId = 2;        
     }
 }

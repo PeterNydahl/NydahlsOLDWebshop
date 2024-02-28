@@ -1,6 +1,6 @@
 ﻿using NydahlsWebshop1000.Models;
 
-namespace NydahlsWebshop1000.Data;
+namespace NydahlsWebshop1000.Data.Classes;
 public class ShoppingCart
 {
     public List<Product> TypesOfProducts { get; set; } = new();

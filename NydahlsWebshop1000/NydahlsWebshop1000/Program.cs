@@ -6,6 +6,7 @@ using NydahlsWebshop1000.Client.Pages;
 using NydahlsWebshop1000.Components;
 using NydahlsWebshop1000.Components.Account;
 using NydahlsWebshop1000.Data;
+using NydahlsWebshop1000.Data.Classes;
 using NydahlsWebshop1000.Models;
 using NydahlsWebshop1000.Repository;
 
