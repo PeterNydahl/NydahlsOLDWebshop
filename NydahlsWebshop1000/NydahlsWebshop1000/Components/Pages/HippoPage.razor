@@ -7,8 +7,8 @@
 @inject ProductRepository productRepository
 @inject ShoppingCart shoppingCart
 
-
-<img src="@hippo?.ImgUrl" />
+<p>HippoCount: @hippo.Quantity</p>
+<img src="@(soldOut ? hippo.ImgUrlSoldOut : hippo.ImgUrl)" />
 <h3>@hippo?.Title</h3>
 <p>Description: @hippo?.Description</p>
 <p>Price: @hippo?.Price (USD)</p>
@@ -20,15 +20,21 @@
     public int Id { get; set; }
 
     public Product? hippo = new();
+    bool soldOut = false; 
 
     protected override async Task OnInitializedAsync()
     {
         hippo = await productRepository.GetProduct(Id);
+        if (hippo.Quantity < 1)
+            soldOut = true;
     }
 
-    public void AddToCart(Product addedHippo)
+    public async Task AddToCart(Product addedHippo)
     {
         // shoppingCart.AddToOrder(addedHippo);
         shoppingCart.AddToProductsAndAmounts(addedHippo);
+        await productRepository.UpdateQuantity(addedHippo.Id);
+        if (addedHippo.Quantity < 1)
+            soldOut = true;
     }
 }

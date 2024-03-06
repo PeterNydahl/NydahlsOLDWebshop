@@ -4,7 +4,8 @@
 
 <p>
     <a href=@($"/hippo-page/{@Product?.Id}")>
-        <img src="@Product?.ImgUrl"><br />
+        <img src="@(soldOut ? Product?.ImgUrlSoldOut : Product?.ImgUrl)" />
+        <br />
         @Product?.Title
     </a>
 </p>
@@ -12,4 +13,11 @@
 @code {
     [Parameter]
     public Product? Product { get; set; }
+    bool soldOut = false;
+
+    protected override void OnInitialized()
+    {
+        if (Product?.Quantity < 1)
+            soldOut = true;
+    }
 }

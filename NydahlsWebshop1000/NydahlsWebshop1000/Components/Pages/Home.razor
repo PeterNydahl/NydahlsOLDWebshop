@@ -21,6 +21,8 @@
 
     protected override async Task OnInitializedAsync()
     {
+        await productRepository.SeedingDatabase();
+
         products = await productRepository.GetProducts();
 
         shoppingCart.TypesOfProducts = products;
