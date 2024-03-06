@@ -45,8 +45,9 @@ public class ProductRepository : DbContext
                 Title = "Hippo-bird",
                 Description = "A mix between a hippo and a bird.",
                 ImgUrl = "/images/HippoBird.jpg",
+                ImgUrlSoldOut = "/images/HippoBirdSoldOut.jpg",
                 Price = 5000,
-                Quantity = 1
+                Quantity = 5
             };
 
             Product nyProdukt2 = new Product
@@ -54,9 +55,9 @@ public class ProductRepository : DbContext
                 Title = "Hippo-dog",
                 Description = "A mix between a hippo and a dog.",
                 ImgUrl = "/images/HippoDog.jpg",
+                ImgUrlSoldOut = "/images/HippoDogSoldOut.jpg",
                 Price = 3500,
-                Quantity = 5
-
+                Quantity = 0
             };
 
             Product nyProdukt3 = new Product
@@ -64,6 +65,7 @@ public class ProductRepository : DbContext
                 Title = "Hippo-snake",
                 Description = "A mix between a hippo and a snake.",
                 ImgUrl = "/images/HippoSnake.jpg",
+                ImgUrlSoldOut = "/images/HippoSnakeSoldOut.jpg",
                 Price = 2500,
                 Quantity = 5
             };
@@ -72,6 +74,7 @@ public class ProductRepository : DbContext
                 Title = "Hippo-Tiger",
                 Description = "A mix between a hippo and a tiger.",
                 ImgUrl = "/images/HippoTiger.jpg",
+                ImgUrlSoldOut = "/images/HippoTigerSoldOut.jpg",
                 Price = 9000,
                 Quantity = 5
             };
@@ -80,6 +83,7 @@ public class ProductRepository : DbContext
                 Title = "Hippo-Turtle",
                 Description = "A mix between a hippo and a Turtle.",
                 ImgUrl = "/images/HippoTurtle.jpg",
+                ImgUrlSoldOut = "/images/HippoTurtleSoldOut.jpg",
                 Price = 500,
                 Quantity = 5
             };

@@ -7,7 +7,7 @@
 @inject ProductRepository productRepository
 @inject ShoppingCart shoppingCart
 
-<p>HippoCount: @hippo.Quantity</p>
+<p>Products left: @hippo.Quantity</p>
 <img src="@(soldOut ? hippo.ImgUrlSoldOut : hippo.ImgUrl)" />
 <h3>@hippo?.Title</h3>
 <p>Description: @hippo?.Description</p>
