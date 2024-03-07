@@ -6,28 +6,62 @@
 @rendermode InteractiveServer
 @inject ProductRepository productRepository
 @inject ShoppingCart shoppingCart
+@inject HttpClient httpClient
 
 <p>Products left: @hippo.Quantity</p>
 <img src="@(soldOut ? hippo.ImgUrlSoldOut : hippo.ImgUrl)" />
 <h3>@hippo?.Title</h3>
 <p>Description: @hippo?.Description</p>
-<p>Price: @hippo?.Price (USD)</p>
-<button @onclick="() => AddToCart(hippo)" class="btn btn-primary">Add to cart</button>
+<div id="currency-buttons">
+    <button @onclick="ToggleCurrencyToUSD" type="button" class="btn @(isUSD?"btn-dark":"btn-light") btn-sm">USD</button>
+    <button @onclick="ToggleCurrencyToEUR" type="button" class="btn @(!isUSD?"btn-dark":"btn-light") btn-sm">EUR</button>
+</div>
+@if (isUSD)
+{
+    <p>Price: @hippo?.Price</p>
+}
+else
+{
+    <p>Price: @priceInEuro</p>
+}
 
+<button @onclick="() => AddToCart(hippo)" class="btn btn-primary">Add to cart</button>
 
 @code {
     [Parameter]
     public int Id { get; set; }
 
     public Product? hippo = new();
-    bool soldOut = false; 
+    bool soldOut = false;
+    ResponseCurrency? responseCurrency = new();
+    float? priceInEuro;
+    bool isUSD = true;
+
 
     protected override async Task OnInitializedAsync()
     {
         hippo = await productRepository.GetProduct(Id);
         if (hippo.Quantity < 1)
             soldOut = true;
+
+        httpClient.DefaultRequestHeaders.Add("X-Api-Key", "qwA/IcrK87u+k5P0dEIlLA==epBQnSQ9HMcGTGL7");
+        var responseCurrency = await httpClient.GetFromJsonAsync<ResponseCurrency>($"https://api.api-ninjas.com/v1/convertcurrency?have=USD&want=EUR&amount={hippo.Price}");
+        priceInEuro = responseCurrency?.new_amount;
+
     }
+
+    public void ToggleCurrencyToUSD()
+    {
+        if (!isUSD)
+            isUSD = true;
+    }
+
+    public void ToggleCurrencyToEUR()
+    {
+        if (isUSD)
+            isUSD = false;
+    }
+
 
     public async Task AddToCart(Product addedHippo)
     {
@@ -36,5 +70,14 @@
         await productRepository.UpdateQuantity(addedHippo.Id);
         if (addedHippo.Quantity < 1)
             soldOut = true;
+
+    }
+
+    class ResponseCurrency()
+    {
+        public float new_amount { get; set; }
+        public string new_currency { get; set; }
+        public string old_currency { get; set; }
+        public float old_amount { get; set; }
     }
 }

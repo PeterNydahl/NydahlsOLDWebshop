@@ -44,6 +44,7 @@ builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSe
 // ********************** my injects ************************
 builder.Services.AddScoped<ProductRepository>();
 builder.Services.AddSingleton<ShoppingCart>();
+builder.Services.AddScoped<HttpClient>();
 
 var app = builder.Build();
 
