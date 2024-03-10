@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NydahlsWebshop1000.Data;
 
@@ -11,9 +12,11 @@ using NydahlsWebshop1000.Data;
 namespace NydahlsWebshop1000.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240308123347_NydahlsInital2")]
+    partial class NydahlsInital2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -229,6 +232,7 @@ namespace NydahlsWebshop1000.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Price")
@@ -329,15 +333,10 @@ namespace NydahlsWebshop1000.Migrations
             modelBuilder.Entity("NydahlsWebshop1000.Models.CartItem", b =>
                 {
                     b.HasOne("NydahlsWebshop1000.Data.ApplicationUser", "User")
-                        .WithMany("CartItems")
+                        .WithMany()
                         .HasForeignKey("UserId");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("NydahlsWebshop1000.Data.ApplicationUser", b =>
-                {
-                    b.Navigation("CartItems");
                 });
 #pragma warning restore 612, 618
         }

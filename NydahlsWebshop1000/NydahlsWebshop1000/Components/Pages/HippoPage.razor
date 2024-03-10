@@ -1,12 +1,171 @@
 ﻿@page "/hippo-page/{id:int}"
 @using Data
 @using Data.Classes
+@using Microsoft.AspNetCore.Identity
 @using Models
+@using NydahlsWebshop1000.Client.Models
 @using Repository
 @rendermode InteractiveServer
+@inject UserRepository userRepository
 @inject ProductRepository productRepository
 @inject ShoppingCart shoppingCart
 @inject HttpClient httpClient
+@inject AuthenticationStateProvider stateProvider
+@inject UserManager<ApplicationUser> userManager
+@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
+@inject NavigationManager navigationManager
+
+<p>Products left: @hippo.Quantity</p>
+<img src="@(soldOut ? hippo.ImgUrlSoldOut : hippo.ImgUrl)" />
+<h3>@hippo?.Title</h3>
+<p>Description: @hippo?.Description</p>
+<div id="currency-buttons">
+    <button @onclick="ToggleCurrencyToUSD" type="button" class="btn @(isUSD?"btn-dark":"btn-light") btn-sm">USD</button>
+    <button @onclick="ToggleCurrencyToEUR" type="button" class="btn @(!isUSD?"btn-dark":"btn-light") btn-sm">EUR</button>
+</div>
+@if (isUSD)
+{
+    <p>Price: @hippo?.Price</p>
+}
+else
+{
+    <p>Price: @priceInEuro</p>
+}
+
+<div class="alert alert-danger @(showAlert ? "d-block" : "d-none")" role="alert">
+    You have to log in first!
+</div>
+<button @onclick="() => AddToCart(hippo)" class="btn btn-primary">Add to cart</button>
+<button @onclick="ProceedToCheckout" class="btn btn-success">go to cart</button>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    ApplicationUser? hippoLoverUser;
+    AuthenticationState? authenticationState;
+
+    bool showAlert = false;
+
+    public Product? hippo = new();
+    bool soldOut = false;
+
+    ResponseCurrency? responseCurrency = new();
+    float? priceInEuro;
+    bool isUSD = true;
+
+    public CartItem cartItem { get; set; } = new CartItem { Name = string.Empty, Price = 0 };
+
+    protected override async Task OnInitializedAsync()
+    {
+        hippo = await productRepository.GetProduct(Id);
+        if (hippo.Quantity < 1)
+            soldOut = true;
+
+        httpClient.DefaultRequestHeaders.Add("X-Api-Key", "qwA/IcrK87u+k5P0dEIlLA==epBQnSQ9HMcGTGL7");
+        responseCurrency = await httpClient.GetFromJsonAsync<ResponseCurrency>($"https://api.api-ninjas.com/v1/convertcurrency?have=USD&want=EUR&amount={hippo.Price}");
+        priceInEuro = responseCurrency?.new_amount;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+
+        if (firstRender)
+        {
+            authenticationState = await stateProvider.GetAuthenticationStateAsync();
+            var user = authenticationState.User;
+            if (user != null)
+            {
+                hippoLoverUser = await userManager.GetUserAsync(user);
+                StateHasChanged();
+            }
+        }
+    }
+
+
+
+    // *** Currency functionality ***
+    #region
+
+    public void ToggleCurrencyToUSD()
+    {
+        if (!isUSD)
+            isUSD = true;
+    }
+
+    public void ToggleCurrencyToEUR()
+    {
+        if (isUSD)
+            isUSD = false;
+    }
+
+    class ResponseCurrency
+    {
+        public float new_amount { get; set; }
+        public string new_currency { get; set; }
+        public string old_currency { get; set; }
+        public float old_amount { get; set; }
+    }
+    #endregion
+
+    public async Task AddToCart(Product addedHippo)
+    {
+        cartItem.Name = addedHippo.Title;
+        cartItem.Price = (int)addedHippo.Price;
+
+        await userRepository.AddCartItemToUser(hippoLoverUser, cartItem);
+
+        //håller reda på antalet produkter kvar
+        shoppingCart.AddToProductsAndAmounts(addedHippo);
+        await productRepository.UpdateQuantity(addedHippo.Id);
+        if (addedHippo.Quantity < 1)
+            soldOut = true;
+    }
+
+    public async Task ProceedToCheckout()
+    {
+        if (hippoLoverUser != null)
+        {
+            List<ClientCartItem> clientCartItems = hippoLoverUser.CartItems.Select(p => new ClientCartItem { Name = p.Name, Price = p.Price }).ToList();
+            // Här lägger vi våra ClientItems i sessionStorage så vi kan hämta ut dem därifrån inne i Client
+            await sessionStorage.SetItemAsync(hippoLoverUser.Id, clientCartItems);
+            navigationManager.NavigateTo("/clientcart");
+        }
+        showAlert = true;
+    }
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@* @page "/hippo-page/{id:int}"
+@using Data
+@using Data.Classes
+@using Microsoft.AspNetCore.Identity
+@using Models
+@using NydahlsWebshop1000.Client.Models
+@using Repository
+@rendermode InteractiveServer
+@inject UserRepository userRepository
+@inject ProductRepository productRepository
+@inject ShoppingCart shoppingCart
+@inject HttpClient httpClient
+@inject AuthenticationStateProvider stateProvider
+@inject UserManager<ApplicationUser> userManager
+@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
+@inject NavigationManager navigationManager
 
 <p>Products left: @hippo.Quantity</p>
 <img src="@(soldOut ? hippo.ImgUrlSoldOut : hippo.ImgUrl)" />
@@ -26,16 +185,24 @@ else
 }
 
 <button @onclick="() => AddToCart(hippo)" class="btn btn-primary">Add to cart</button>
+<button @onclick="ProceedToCheckout" class="btn btn-success">go to cart</button>
 
 @code {
     [Parameter]
     public int Id { get; set; }
 
+    ApplicationUser? hippoLoverUser;
+    AuthenticationState? authenticationState;
+
     public Product? hippo = new();
     bool soldOut = false;
+
     ResponseCurrency? responseCurrency = new();
     float? priceInEuro;
     bool isUSD = true;
+
+    public CartItem cartItem { get; set; } = new CartItem { Name = string.Empty, Price = 0 };
+
 
 
     protected override async Task OnInitializedAsync()
@@ -47,8 +214,24 @@ else
         httpClient.DefaultRequestHeaders.Add("X-Api-Key", "qwA/IcrK87u+k5P0dEIlLA==epBQnSQ9HMcGTGL7");
         var responseCurrency = await httpClient.GetFromJsonAsync<ResponseCurrency>($"https://api.api-ninjas.com/v1/convertcurrency?have=USD&want=EUR&amount={hippo.Price}");
         priceInEuro = responseCurrency?.new_amount;
-
     }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            authenticationState = await stateProvider.GetAuthenticationStateAsync();
+            var user = await userManager.GetUserAsync(authenticationState.User);
+            if (user != null)
+            {
+                hippoLoverUser = await userRepository.GetUserCartItemsInfo(user);
+                StateHasChanged();
+            }
+        }
+    }
+
+    // *** Currency functionality ***
+    #region
 
     public void ToggleCurrencyToUSD()
     {
@@ -62,17 +245,6 @@ else
             isUSD = false;
     }
 
-
-    public async Task AddToCart(Product addedHippo)
-    {
-        // shoppingCart.AddToOrder(addedHippo);
-        shoppingCart.AddToProductsAndAmounts(addedHippo);
-        await productRepository.UpdateQuantity(addedHippo.Id);
-        if (addedHippo.Quantity < 1)
-            soldOut = true;
-
-    }
-
     class ResponseCurrency()
     {
         public float new_amount { get; set; }
@@ -80,4 +252,28 @@ else
         public string old_currency { get; set; }
         public float old_amount { get; set; }
     }
-}
+    #endregion
+
+    public async Task AddToCart(Product addedHippo)
+    {
+        cartItem.Name = addedHippo.Title;
+        cartItem.Price = (int)addedHippo.Price;
+
+        await userRepository.AddCartItemToUser(hippoLoverUser, cartItem);
+
+        //håller reda på antalet produkter kvar
+        shoppingCart.AddToProductsAndAmounts(addedHippo);
+        await productRepository.UpdateQuantity(addedHippo.Id);
+        if (addedHippo.Quantity < 1)
+            soldOut = true;
+    }
+
+    public async Task ProceedToCheckout()
+    {
+        List<ClientCartItem> clientCartItems = hippoLoverUser.CartItems.Select(p => new ClientCartItem { Name = p.Name, Price = p.Price }).ToList();
+        // Här lägger vi våra ClientItems i sessionStorage så vi kan hämta ut dem därifrån inne i Client
+        await sessionStorage.SetItemAsync(hippoLoverUser.Id, clientCartItems);
+        navigationManager.NavigateTo("/clientcart");
+    }
+
+} *@

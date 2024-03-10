@@ -2,11 +2,17 @@
 @using NydahlsWebshop1000.Data.Classes
 @using NydahlsWebshop1000.Data
 @using NydahlsWebshop1000.Models
+@using System.Text.Json
 
 @inject ShoppingCart shoppingCart
+@inject NavigationManager navigationManager
+@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
 @rendermode InteractiveServer
 
+<button @onclick="ProceedToCheckout" class="btn btn-success">go to cart</button>
+
 @* SHOW CHECKOUT *@
+
 @if (PageId == 2)
 {
     <h3>Thank you for your order!</h3>
@@ -61,7 +67,7 @@
     </table>
 }
 
-@* SHOW SHOPPING CART *@
+@* SHOW CURRENT SHOPPING CART *@
 @if (PageId == 1)
 {
     @* ***** current cart ****** *@
@@ -156,5 +162,10 @@
         checkoutProductsAndAmounts = new Dictionary<int, int>(shoppingCart.ProductsAndAmounts);
         shoppingCart.ProductsAndAmounts.Clear();
         PageId = 2;        
+    }
+
+    public async Task ProceedToCheckout()
+    {
+        navigationManager.NavigateTo("/orderconfirmationpage");
     }
 }

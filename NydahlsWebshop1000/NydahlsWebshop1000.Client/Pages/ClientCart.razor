@@ -1,0 +1,38 @@
+﻿@page "/clientcart"
+@using NydahlsWebshop1000.Client.Models
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Authorization
+@inject AuthenticationStateProvider stateProvider
+@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
+
+<h3>ClientCart</h3>
+<p>Här kan du se vad du lagt i varukorgen!</p>
+@foreach (var item in checkoutCartItems)
+{
+	<p>@item.Name</p>
+	<p>@item.Price</p>
+}
+
+@code {
+	private AuthenticationState authenticationState;
+
+	List<ClientCartItem> checkoutCartItems = new();
+	
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			authenticationState = await stateProvider.GetAuthenticationStateAsync();
+
+			var userId = authenticationState
+				.User
+				.Claims
+				.Where(c => c.Type == ClaimTypes.NameIdentifier)
+				.First()
+				.Value;
+
+			checkoutCartItems = await sessionStorage.GetItemAsync<List<ClientCartItem>>(userId);
+			StateHasChanged();
+		}
+	}
+}

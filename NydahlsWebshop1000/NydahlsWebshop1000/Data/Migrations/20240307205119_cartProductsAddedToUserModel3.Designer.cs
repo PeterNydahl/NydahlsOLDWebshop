@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NydahlsWebshop1000.Data;
 
@@ -11,9 +12,11 @@ using NydahlsWebshop1000.Data;
 namespace NydahlsWebshop1000.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240307205119_cartProductsAddedToUserModel3")]
+    partial class cartProductsAddedToUserModel3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -220,7 +223,7 @@ namespace NydahlsWebshop1000.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("NydahlsWebshop1000.Models.CartItem", b =>
+            modelBuilder.Entity("NydahlsWebshop1000.Models.Order", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -228,20 +231,15 @@ namespace NydahlsWebshop1000.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Price")
+                    b.Property<int>("CustomerId")
                         .HasColumnType("int");
 
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<long>("Price")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
-
-                    b.ToTable("CartItems");
+                    b.ToTable("Orders");
                 });
 
             modelBuilder.Entity("NydahlsWebshop1000.Models.Product", b =>
@@ -261,6 +259,9 @@ namespace NydahlsWebshop1000.Migrations
                     b.Property<string>("ImgUrlSoldOut")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("OrderId")
+                        .HasColumnType("int");
+
                     b.Property<long>("Price")
                         .HasColumnType("bigint");
 
@@ -271,6 +272,8 @@ namespace NydahlsWebshop1000.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("OrderId");
 
                     b.ToTable("Products");
                 });
@@ -326,18 +329,16 @@ namespace NydahlsWebshop1000.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("NydahlsWebshop1000.Models.CartItem", b =>
+            modelBuilder.Entity("NydahlsWebshop1000.Models.Product", b =>
                 {
-                    b.HasOne("NydahlsWebshop1000.Data.ApplicationUser", "User")
-                        .WithMany("CartItems")
-                        .HasForeignKey("UserId");
-
-                    b.Navigation("User");
+                    b.HasOne("NydahlsWebshop1000.Models.Order", null)
+                        .WithMany("OrderedProducts")
+                        .HasForeignKey("OrderId");
                 });
 
-            modelBuilder.Entity("NydahlsWebshop1000.Data.ApplicationUser", b =>
+            modelBuilder.Entity("NydahlsWebshop1000.Models.Order", b =>
                 {
-                    b.Navigation("CartItems");
+                    b.Navigation("OrderedProducts");
                 });
 #pragma warning restore 612, 618
         }

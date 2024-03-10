@@ -1,0 +1,44 @@
+﻿@page "/orderconfirmationpage"
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Authorization
+@using NydahlsWebshop1000.Client.ClassesClient
+@using System.Text.Json
+@inject AuthenticationStateProvider stateProvider
+@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
+
+@attribute [Authorize]
+@rendermode InteractiveWebAssembly
+
+<h3>Order Confirmation</h3>
+<p>Hej på dig @message</p>
+
+@code {
+
+	string message = string.Empty;
+	AuthenticationState authenticationState;
+
+	public SessionStorageData? sessionStorageData { get; set; } = new();
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			authenticationState = await stateProvider.GetAuthenticationStateAsync();
+
+			var registeredUserId = authenticationState
+				.User
+				.Claims
+				.Where(c => c.Type == ClaimTypes.NameIdentifier)
+				.First()
+				.Value;
+
+			// ConfirmationItems = await sessionStorage.GetItemAsync<List<ClientItem>>(userId);
+
+
+			message = authenticationState.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
+
+			//uppdatera komponentens state
+			StateHasChanged();
+		}
+	}
+}
